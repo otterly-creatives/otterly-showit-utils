@@ -3,71 +3,61 @@
  * Originally inspired by doitwithshowit (Pratik-Khaling)
  * Customized by Otterly Creatives | IG: @otterly.creatives
  */
+
 document.addEventListener("DOMContentLoaded", function () {
-    const counterIte = document.getElementsByClassName('count');
-    console.log("LOADED");
+    const counterItems = document.getElementsByClassName('count');
+    console.log("Otterly Counter Loaded ✅");
+
     const observerOptions = {
         root: null,
         rootMargin: '0px',
-        threshold: 0.5 // Adjust this threshold value as needed
+        threshold: 0.5 // Trigger when 50% visible
     };
 
     const observer = new IntersectionObserver(function(entries, observer) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const counter = entry.target;
-                const maxCount = parseInt(counter.textContent);
+                const maxCount = parseInt(counter.getAttribute("data-val")) || parseInt(counter.innerText);
+
                 let count = 0;
 
                 function updateCounter() {
-                    counter.textContent = count;
+                    // Update ONLY the number, don’t reset styles
+                    counter.innerText = count;
                 }
 
                 function increaseCounter() {
                     if (count < maxCount) {
-                        
                         if (maxCount >= 999) {
                             count += 21;
-                            if (count > maxCount){
-                                count = maxCount;
-                            } // Faster animation for 4-digit numbers
+                            if (count > maxCount) count = maxCount;
                         } else if (maxCount >= 99) {
                             count += 3;
-                            if (count > maxCount){
-                                count = maxCount;
-                            }  // Faster animation for 3-digit numbers
-                        }
-                        else{
+                            if (count > maxCount) count = maxCount;
+                        } else {
                             count += 1;
                         }
                         updateCounter();
+                    } else {
+                        clearInterval(intervalId);
                     }
                 }
 
-                let duration = 50; // Default duration
+                let duration = 50;
+                if (maxCount >= 1000) duration = 15;
+                else if (maxCount >= 100) duration = 20;
 
-                if (maxCount >= 1000) {
-                    duration = 15; // Faster animation for 4-digit numbers
-                } else if (maxCount >= 100) {
-                    duration = 20; // Faster animation for 3-digit numbers
-                }
-
-                // Start the counter when the element is in the viewport
                 const intervalId = setInterval(increaseCounter, duration);
 
-                // Stop the animation when the counter reaches the maxCount
-                if (count >= maxCount) {
-                    clearInterval(intervalId);
-                }
-
-                // Once the counter starts, we don't need to observe it anymore
+                // Stop observing after animation
                 observer.unobserve(counter);
             }
         });
     }, observerOptions);
 
-    // Start observing each counter element
-    for (let i = 0; i < counterIte.length; i++) {
-        observer.observe(counterIte[i]);
+    // Observe each element with class "count"
+    for (let i = 0; i < counterItems.length; i++) {
+        observer.observe(counterItems[i]);
     }
 });

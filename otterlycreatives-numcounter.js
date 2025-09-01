@@ -11,20 +11,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const observerOptions = {
         root: null,
         rootMargin: '0px',
-        threshold: 0.5 // Trigger when 50% visible
+        threshold: 0.5
     };
 
     const observer = new IntersectionObserver(function(entries, observer) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const counter = entry.target;
-                const maxCount = parseInt(counter.getAttribute("data-val")) || parseInt(counter.innerText);
+
+                // Look for the inner <span> (the actual number holder)
+                const numberSpan = counter.querySelector("span");
+                const maxCount = parseInt(counter.getAttribute("data-val")) 
+                               || parseInt(numberSpan ? numberSpan.innerText : counter.innerText);
 
                 let count = 0;
 
                 function updateCounter() {
-                    // Update ONLY the number, don’t reset styles
-                    counter.innerText = count;
+                    if (numberSpan) {
+                        numberSpan.innerText = count;
+                    } else {
+                        counter.innerText = count;
+                    }
                 }
 
                 function increaseCounter() {
@@ -50,13 +57,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const intervalId = setInterval(increaseCounter, duration);
 
-                // Stop observing after animation
                 observer.unobserve(counter);
             }
         });
     }, observerOptions);
 
-    // Observe each element with class "count"
     for (let i = 0; i < counterItems.length; i++) {
         observer.observe(counterItems[i]);
     }
